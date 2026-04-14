@@ -32,7 +32,7 @@ Self-hosted internal tools platform for GlitchTip, Plane, and n8n behind Caddy.
    to matching `.env` files.
 3. Point `errors.bobadilla.tech`, `tasks.bobadilla.tech`, and
    `flows.bobadilla.tech` at the VPS.
-4. Run `./scripts/generate-secrets.sh <caddy-basic-auth-password> --apply` to
+4. Run `./scripts/generate-secrets.sh --apply` to
    populate the generated secrets.
 5. Run `docker compose up -d` from the repository root.
 
@@ -41,9 +41,7 @@ GlitchTip is exposed on `errors.bobadilla.tech`, Plane on
 
 ## Notes
 
-- Caddy basic auth protects the browser UIs.
-- GlitchTip ingestion endpoints and n8n webhook endpoints bypass basic auth so
-  external clients can still send data.
+- Caddy handles TLS termination and host-based routing for all apps.
 - Plane also needs RabbitMQ and MinIO, so those are included as internal support
   services.
 - Retention is configured in the app env files rather than by an external backup

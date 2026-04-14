@@ -90,9 +90,7 @@ cp .env.example .env
 cp services/glitchtip.env.example services/glitchtip.env
 cp services/plane.env.example services/plane.env
 cp services/n8n.env.example services/n8n.env
-read -rsp "Caddy basic-auth password: " CADDY_PASS; echo
-./scripts/generate-secrets.sh "$CADDY_PASS" --apply
-unset CADDY_PASS
+./scripts/generate-secrets.sh --apply
 ```
 
 Edit `.env` and service env files if you need custom domains or retention
@@ -141,8 +139,6 @@ Open:
 - `https://tasks.bobadilla.tech`
 - `https://flows.bobadilla.tech`
 
-Use the Caddy basic-auth credentials you set during `generate-secrets.sh`.
-
 ## 8. Update Workflow
 
 ```bash
@@ -153,5 +149,4 @@ cd ~/internal-tools
 ## Notes
 
 - You do not need an AWS account. GlitchTip and Plane use MinIO in this stack.
-- Keep a secure copy of your Caddy password. Only the hash is stored in `.env`.
 - If certificates do not issue, verify DNS, ports 80/443, and firewall rules.

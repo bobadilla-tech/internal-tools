@@ -4,47 +4,15 @@
 
 {$DOMAIN_ERRORS} {
   encode zstd gzip
-
-  @glitchtip_ingest path /api/*/envelope/ /api/*/store/ /api/*/security/ /api/*/minidump/
-  handle @glitchtip_ingest {
-    reverse_proxy glitchtip:8000
-  }
-
-  handle {
-    basic_auth {
-      {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
-    }
-    reverse_proxy glitchtip:8000
-  }
+  reverse_proxy glitchtip:8000
 }
 
 {$DOMAIN_TASKS} {
   encode zstd gzip
-
-  basic_auth {
-    {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
-  }
-
-  reverse_proxy plane:80 {
-    header_up Host {host}
-    header_up X-Real-IP {remote_host}
-    header_up X-Forwarded-For {remote_host}
-    header_up X-Forwarded-Proto {scheme}
-  }
+  reverse_proxy plane:80
 }
 
 {$DOMAIN_FLOWS} {
   encode zstd gzip
-
-  @n8n_webhooks path /webhook* /webhook-test* /webhook-ws*
-  handle @n8n_webhooks {
-    reverse_proxy n8n:5678
-  }
-
-  handle {
-    basic_auth {
-      {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
-    }
-    reverse_proxy n8n:5678
-  }
+  reverse_proxy n8n:5678
 }

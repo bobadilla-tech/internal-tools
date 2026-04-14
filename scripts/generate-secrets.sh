@@ -80,16 +80,25 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-if [ "$#" -lt 1 ]; then
-  echo "Usage: $0 <caddy-basic-auth-password> [--apply]" >&2
-  exit 1
+AUTH_PASSWORD=""
+APPLY=""
+
+for arg in "$@"; do
+  if [ "$arg" = "--apply" ]; then
+    APPLY="--apply"
+  elif [ -z "$AUTH_PASSWORD" ]; then
+    AUTH_PASSWORD=$arg
+  else
+    echo "Usage: $0 [caddy-basic-auth-password] [--apply]" >&2
+    exit 1
+  fi
+done
+
+CADDY_HASH_ESCAPED=""
+if [ -n "$AUTH_PASSWORD" ]; then
+  CADDY_HASH=$(hash_caddy_password "$AUTH_PASSWORD")
+  CADDY_HASH_ESCAPED=$(printf '%s' "$CADDY_HASH" | sed 's/[$]/$$/g')
 fi
-
-AUTH_PASSWORD=$1
-APPLY=${2:-}
-
-CADDY_HASH=$(hash_caddy_password "$AUTH_PASSWORD")
-CADDY_HASH_ESCAPED=$(printf '%s' "$CADDY_HASH" | sed 's/[$]/$$/g')
 
 TMP_FILE=$(mktemp)
 trap 'rm -f "$TMP_FILE"' EXIT
@@ -97,7 +106,11 @@ trap 'rm -f "$TMP_FILE"' EXIT
 while IFS= read -r line || [ -n "$line" ]; do
   case $line in
     CADDY_BASIC_AUTH_HASH=*)
-      printf 'CADDY_BASIC_AUTH_HASH=%s\n' "$CADDY_HASH_ESCAPED" >> "$TMP_FILE"
+      if [ -n "$CADDY_HASH_ESCAPED" ]; then
+        printf 'CADDY_BASIC_AUTH_HASH=%s\n' "$CADDY_HASH_ESCAPED" >> "$TMP_FILE"
+      else
+        printf '%s\n' "$line" >> "$TMP_FILE"
+      fi
       ;;
     POSTGRES_ADMIN_PASSWORD=change-me-superuser)
       printf 'POSTGRES_ADMIN_PASSWORD=%s\n' "$(generate_secret)" >> "$TMP_FILE"
