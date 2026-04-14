@@ -27,6 +27,8 @@ Wait for DNS propagation before expecting TLS certificates.
 
 ## 3. Bootstrap the Host
 
+Important: paste only the commands below. Do not paste shell prompts like `root@host:~#` or command output lines.
+
 SSH into the server as root or a sudo user:
 
 ```bash
@@ -41,9 +43,9 @@ apt install -y ca-certificates curl gnupg
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo $VERSION_CODENAME) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+ARCH=$(dpkg --print-architecture)
+CODENAME=$(awk -F= '/^VERSION_CODENAME=/{print $2}' /etc/os-release)
+echo "deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${CODENAME} stable" > /etc/apt/sources.list.d/docker.list
 apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
@@ -51,9 +53,11 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker
 Create a deploy user and grant Docker access:
 
 ```bash
-adduser deploy
+id deploy >/dev/null 2>&1 || adduser deploy
 usermod -aG sudo deploy
 usermod -aG docker deploy
+docker --version
+docker compose version
 ```
 
 ## 4. Host Firewall (UFW)
@@ -75,13 +79,16 @@ As the deploy user:
 
 ```bash
 su - deploy
-git clone <your-repo-url> internal-tools
+git clone https://github.com/bobadilla-tech/internal-tools
 cd internal-tools
 cp .env.example .env
 cp services/glitchtip.env.example services/glitchtip.env
 cp services/plane.env.example services/plane.env
 cp services/n8n.env.example services/n8n.env
-./scripts/generate-secrets.sh '<strong-password-for-caddy>' --apply
+./scripts/generate-secrets.sh 'replace-with-a-strong-caddy-password' --apply
+# Ensure Plane uses a published tag if you cloned an older revision.
+sed -i 's#^PLANE_IMAGE=.*#PLANE_IMAGE=makeplane/plane-aio-community:stable#' .env
+grep '^PLANE_IMAGE=' .env
 ```
 
 Edit `.env` and service env files if you need custom domains or retention
