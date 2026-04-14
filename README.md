@@ -10,7 +10,14 @@ Self-hosted internal tools platform for GlitchTip, Plane, and n8n behind Caddy.
 - `db/init/01-init.sh` creates the shared PostgreSQL databases and roles.
 - `Caddyfile` routes HTTPS traffic to the apps.
 - `scripts/update.sh` pulls new images and recreates the stack.
-- `docs/setup.md` and `docs/runbook.md` cover bootstrap and operations.
+- `docs/setup.md`, `docs/hetzner.md`, and `docs/runbook.md` cover bootstrap and
+  operations.
+
+## Deployment Guides
+
+- General setup: [docs/setup.md](docs/setup.md)
+- Hetzner-specific setup: [docs/hetzner.md](docs/hetzner.md)
+- Operations runbook: [docs/runbook.md](docs/runbook.md)
 
 ## Quick Start
 

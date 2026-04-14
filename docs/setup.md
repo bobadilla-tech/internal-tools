@@ -2,6 +2,9 @@
 
 This repository is designed for a fresh Ubuntu 24.04 LTS VPS.
 
+For Hetzner Cloud-specific instructions, follow
+[docs/hetzner.md](docs/hetzner.md).
+
 ## Host Preparation
 
 1. Install Docker and Docker Compose.
