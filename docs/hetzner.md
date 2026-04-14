@@ -106,6 +106,24 @@ docker compose up -d
 docker compose ps
 ```
 
+If you see `password authentication failed` for `glitchtip_user` right after a
+fresh install, your PostgreSQL volume was likely initialized with older
+credentials. If you have no data to preserve yet, run a clean reset:
+
+```bash
+docker compose down -v
+docker compose up -d
+docker compose ps
+```
+
+If you update this repository after the first deploy, recreate Caddy so it picks
+up any new environment variables or Caddyfile changes:
+
+```bash
+docker compose up -d --force-recreate caddy
+docker compose logs --tail=100 caddy
+```
+
 Check logs:
 
 ```bash
