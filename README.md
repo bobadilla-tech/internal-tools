@@ -48,3 +48,5 @@ GlitchTip is exposed on `errors.bobadilla.tech`, Plane on
   services.
 - Retention is configured in the app env files rather than by an external backup
   or monitoring layer.
+- If services drift into DB auth or startup-order failures, run
+   `./scripts/recover.sh`.

@@ -54,3 +54,20 @@ persistent volumes.
   `GLITCHTIP_DOMAIN`.
 - If n8n loops on startup, confirm `N8N_ENCRYPTION_KEY` and the PostgreSQL
   credentials.
+
+### One-Command Recovery
+
+When app services fail due to DB auth drift, startup order, or n8n encryption
+key mismatch, run:
+
+```bash
+./scripts/recover.sh
+```
+
+This script:
+
+- starts core dependencies (`postgres`, `redis`, `rabbitmq`, `minio`),
+- waits for PostgreSQL readiness,
+- reconciles app roles/databases against `.env` passwords,
+- resets only n8n local state to avoid key mismatch loops,
+- recreates `n8n`, `glitchtip`, and `caddy`, then starts `plane`.
