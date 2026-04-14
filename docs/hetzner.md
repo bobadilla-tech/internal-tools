@@ -19,7 +19,7 @@ In Hetzner Cloud:
 
 Create A records to the server IP:
 
-- `errors.bobadilla.tech`
+- `issues.bobadilla.tech`
 - `tasks.bobadilla.tech`
 - `flows.bobadilla.tech`
 
@@ -135,7 +135,7 @@ docker compose logs -f n8n
 
 Open:
 
-- `https://errors.bobadilla.tech`
+- `https://issues.bobadilla.tech`
 - `https://tasks.bobadilla.tech`
 - `https://flows.bobadilla.tech`
 

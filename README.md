@@ -30,13 +30,13 @@ Self-hosted internal tools platform for GlitchTip, Plane, and n8n behind Caddy.
    and
    [services/n8n.env.example](/Users/eliazbobadilla/Documents/internal-tools/services/n8n.env.example)
    to matching `.env` files.
-3. Point `errors.bobadilla.tech`, `tasks.bobadilla.tech`, and
+3. Point `issues.bobadilla.tech`, `tasks.bobadilla.tech`, and
    `flows.bobadilla.tech` at the VPS.
 4. Run `./scripts/generate-secrets.sh --apply` to
    populate the generated secrets.
 5. Run `docker compose up -d` from the repository root.
 
-GlitchTip is exposed on `errors.bobadilla.tech`, Plane on
+GlitchTip is exposed on `issues.bobadilla.tech`, Plane on
 `tasks.bobadilla.tech`, and n8n on `flows.bobadilla.tech`.
 
 ## Notes

@@ -11,7 +11,7 @@ For Hetzner Cloud-specific instructions, follow
 2. Add your deploy user to the `docker` group.
 3. Open only ports `80` and `443` in the firewall.
 4. Point these DNS records at the VPS:
-   - `errors.bobadilla.tech`
+   - `issues.bobadilla.tech`
    - `tasks.bobadilla.tech`
    - `flows.bobadilla.tech`
 
@@ -50,7 +50,7 @@ settle.
 
 ## First Run Checklist
 
-1. Open `https://errors.bobadilla.tech` and create the first GlitchTip user,
+1. Open `https://issues.bobadilla.tech` and create the first GlitchTip user,
    organization, and project.
 2. Copy the GlitchTip DSN and add it to your application.
 3. Open `https://tasks.bobadilla.tech` and create the first Plane
