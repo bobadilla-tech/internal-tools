@@ -96,7 +96,7 @@ unset CADDY_PASS
 ```
 
 Edit `.env` and service env files if you need custom domains or retention
-values.
+values. The secret generator synchronizes service credentials automatically.
 
 ## 6. Deploy
 

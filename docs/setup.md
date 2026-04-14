@@ -33,7 +33,8 @@ For Hetzner Cloud-specific instructions, follow
    to
    [services/n8n.env](/Users/eliazbobadilla/Documents/internal-tools/services/n8n.env).
 5. Run `./scripts/generate-secrets.sh <caddy-basic-auth-password> --apply` to
-   generate the shared passwords and Caddy hash.
+   generate the shared passwords, Caddy hash, and synchronize service `.env`
+   credentials.
 6. Review `.env` and confirm the DNS names and generated values are correct.
 7. Make sure the domain names in the service env files match the DNS records.
 
