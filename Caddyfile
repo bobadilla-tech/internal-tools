@@ -25,7 +25,12 @@
     {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
   }
 
-  reverse_proxy plane:80
+  reverse_proxy plane:80 {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+  }
 }
 
 {$DOMAIN_FLOWS} {
