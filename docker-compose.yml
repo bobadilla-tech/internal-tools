@@ -7,6 +7,15 @@ services:
       POSTGRES_USER: ${POSTGRES_ADMIN_USER}
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       TZ: ${TZ}
+      GLITCHTIP_DB_NAME: ${GLITCHTIP_DB_NAME}
+      GLITCHTIP_DB_USER: ${GLITCHTIP_DB_USER}
+      GLITCHTIP_DB_PASSWORD: ${GLITCHTIP_DB_PASSWORD}
+      PLANE_DB_NAME: ${PLANE_DB_NAME}
+      PLANE_DB_USER: ${PLANE_DB_USER}
+      PLANE_DB_PASSWORD: ${PLANE_DB_PASSWORD}
+      N8N_DB_NAME: ${N8N_DB_NAME}
+      N8N_DB_USER: ${N8N_DB_USER}
+      N8N_DB_PASSWORD: ${N8N_DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
