@@ -11,7 +11,7 @@
   }
 
   handle {
-    basicauth {
+    basic_auth {
       {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
     }
     reverse_proxy glitchtip:8000
@@ -21,7 +21,7 @@
 {$DOMAIN_TASKS} {
   encode zstd gzip
 
-  basicauth {
+  basic_auth {
     {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
   }
 
@@ -37,7 +37,7 @@
   }
 
   handle {
-    basicauth {
+    basic_auth {
       {$CADDY_BASIC_AUTH_USER} {$CADDY_BASIC_AUTH_HASH}
     }
     reverse_proxy n8n:5678
