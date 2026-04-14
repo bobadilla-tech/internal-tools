@@ -79,16 +79,20 @@ As the deploy user:
 
 ```bash
 su - deploy
+```
+
+Wait for the prompt to change to `deploy@...` and then run:
+
+```bash
 git clone https://github.com/bobadilla-tech/internal-tools
 cd internal-tools
 cp .env.example .env
 cp services/glitchtip.env.example services/glitchtip.env
 cp services/plane.env.example services/plane.env
 cp services/n8n.env.example services/n8n.env
-./scripts/generate-secrets.sh 'replace-with-a-strong-caddy-password' --apply
-# Ensure Plane uses a published tag if you cloned an older revision.
-sed -i 's#^PLANE_IMAGE=.*#PLANE_IMAGE=makeplane/plane-aio-community:stable#' .env
-grep '^PLANE_IMAGE=' .env
+read -rsp "Caddy basic-auth password: " CADDY_PASS; echo
+./scripts/generate-secrets.sh "$CADDY_PASS" --apply
+unset CADDY_PASS
 ```
 
 Edit `.env` and service env files if you need custom domains or retention
