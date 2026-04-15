@@ -135,8 +135,12 @@ services:
     expose:
       - "80"
     volumes:
-      - plane_data:/app/data
-      - plane_logs:/app/logs
+      - type: volume
+        source: plane_data
+        target: /app/data
+      - type: volume
+        source: plane_logs
+        target: /app/logs
 
   n8n:
     image: ${N8N_IMAGE}
