@@ -109,7 +109,7 @@ sed -i 's#^EMAIL_URL=.*#EMAIL_URL=smtp://resend:<resend_api_key>@smtp.resend.com
 
 # Plane
 cat <<'EOF' >> services/plane.env
-DEFAULT_FROM_EMAIL=plane@tasks.bobadilla.tech
+DEFAULT_FROM_EMAIL=plane@interal.bobadilla.tech
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.resend.com
 EMAIL_PORT=465
