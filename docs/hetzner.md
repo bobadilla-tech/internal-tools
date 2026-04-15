@@ -99,24 +99,24 @@ values. The secret generator synchronizes service credentials automatically.
 
 If you want real user invite/reset emails, configure SMTP before deploy:
 
-Create SMTP credentials in Resend first. Do not paste a Resend API key into
-SMTP password fields.
+For Resend SMTP, use username `resend` and your Resend API key as the SMTP
+password.
 
 ```bash
 # GlitchTip
 # Replace consolemail:// with real SMTP
-sed -i 's#^EMAIL_URL=.*#EMAIL_URL=smtp://resend:<resend_smtp_password>@smtp.resend.com:587/?tls=True#' services/glitchtip.env
+sed -i 's#^EMAIL_URL=.*#EMAIL_URL=smtp://resend:<resend_api_key>@smtp.resend.com:465/?ssl=True#' services/glitchtip.env
 
 # Plane
 cat <<'EOF' >> services/plane.env
 DEFAULT_FROM_EMAIL=plane@tasks.bobadilla.tech
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.resend.com
-EMAIL_PORT=587
+EMAIL_PORT=465
 EMAIL_HOST_USER=resend
-EMAIL_HOST_PASSWORD=<resend_smtp_password>
-EMAIL_USE_TLS=true
-EMAIL_USE_SSL=false
+EMAIL_HOST_PASSWORD=<resend_api_key>
+EMAIL_USE_TLS=false
+EMAIL_USE_SSL=true
 EOF
 ```
 

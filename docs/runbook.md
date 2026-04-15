@@ -47,7 +47,7 @@ persistent volumes.
    auth.
 4. Restart the stack and confirm the data volumes survive.
 5. Send a test invite from GlitchTip and Plane, then confirm delivery in the
-  target inbox.
+   target inbox.
 
 ## Troubleshooting
 
