@@ -37,6 +37,30 @@ For Hetzner Cloud-specific instructions, follow
 6. Review `.env` and confirm the DNS names and generated values are correct.
 7. Make sure the domain names in the service env files match the DNS records.
 
+## SMTP (Resend)
+
+Configure outbound email before onboarding users so invite and reset emails can
+be delivered.
+
+These services use SMTP credentials. A Resend API key is not the same as the
+SMTP password expected by these environment variables.
+
+1. In `services/glitchtip.env`, replace `EMAIL_URL=consolemail://` with your
+   Resend SMTP URL, for example:
+   `EMAIL_URL=smtp://resend:<resend_smtp_password>@smtp.resend.com:587/?tls=True`
+2. In `services/plane.env`, set SMTP values:
+   `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`
+   `EMAIL_HOST=smtp.resend.com`
+   `EMAIL_PORT=587`
+   `EMAIL_HOST_USER=resend`
+   `EMAIL_HOST_PASSWORD=<resend_smtp_password>`
+   `EMAIL_USE_TLS=true`
+3. Keep real SMTP secrets only in runtime `.env` files on the server. Do not
+   store real credentials in `*.example` files.
+4. Recreate app services after env updates:
+   `docker compose up -d --force-recreate glitchtip plane`
+5. Verify email delivery by sending one invite from each app.
+
 ## Start
 
 Run:
@@ -56,6 +80,7 @@ settle.
 3. Open `https://tasks.bobadilla.tech` and create the first Plane
    account/workspace.
 4. Open `https://flows.bobadilla.tech` and finish the n8n setup.
+5. Send one invite from GlitchTip and one invite from Plane to confirm SMTP.
 
 ## Notes
 

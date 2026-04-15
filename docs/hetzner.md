@@ -97,6 +97,32 @@ cp services/n8n.env.example services/n8n.env
 Edit `.env` and service env files if you need custom domains or retention
 values. The secret generator synchronizes service credentials automatically.
 
+If you want real user invite/reset emails, configure SMTP before deploy:
+
+Create SMTP credentials in Resend first. Do not paste a Resend API key into
+SMTP password fields.
+
+```bash
+# GlitchTip
+# Replace consolemail:// with real SMTP
+sed -i 's#^EMAIL_URL=.*#EMAIL_URL=smtp://resend:<resend_smtp_password>@smtp.resend.com:587/?tls=True#' services/glitchtip.env
+
+# Plane
+cat <<'EOF' >> services/plane.env
+DEFAULT_FROM_EMAIL=plane@tasks.bobadilla.tech
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.resend.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=resend
+EMAIL_HOST_PASSWORD=<resend_smtp_password>
+EMAIL_USE_TLS=true
+EMAIL_USE_SSL=false
+EOF
+```
+
+Keep SMTP credentials only in server runtime files (`.env`, `services/*.env`).
+Do not commit real credentials.
+
 ## 6. Deploy
 
 ```bash
@@ -123,6 +149,13 @@ docker compose up -d --force-recreate caddy
 docker compose logs --tail=100 caddy
 ```
 
+If you changed app SMTP/env settings, recreate app containers:
+
+```bash
+docker compose up -d --force-recreate glitchtip plane
+docker compose ps
+```
+
 Check logs:
 
 ```bash
@@ -130,6 +163,13 @@ docker compose logs -f caddy
 docker compose logs -f glitchtip
 docker compose logs -f plane
 docker compose logs -f n8n
+```
+
+Quick email checks:
+
+```bash
+docker compose logs --tail=300 glitchtip | rg -i "invite|email|smtp|reset"
+docker compose logs --tail=300 plane | rg -i "invite|email|smtp|reset"
 ```
 
 ## 7. First Access

@@ -43,6 +43,9 @@ GlitchTip uses `consolemail://` by default in this repo so signup emails are
 written to the container logs instead of requiring SMTP. Swap `EMAIL_URL` in
 `services/glitchtip.env` if you want real outbound mail.
 
+Plane also requires SMTP variables in `services/plane.env` for invite and
+password reset email delivery. See `docs/setup.md` for a Resend SMTP example.
+
 ## Notes
 
 - Caddy handles TLS termination and host-based routing for all apps.

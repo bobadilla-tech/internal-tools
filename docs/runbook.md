@@ -46,6 +46,8 @@ persistent volumes.
 3. Verify n8n webhooks still work even though the UI is protected by Caddy basic
    auth.
 4. Restart the stack and confirm the data volumes survive.
+5. Send a test invite from GlitchTip and Plane, then confirm delivery in the
+  target inbox.
 
 ## Troubleshooting
 
@@ -54,6 +56,26 @@ persistent volumes.
   `GLITCHTIP_DOMAIN`.
 - If n8n loops on startup, confirm `N8N_ENCRYPTION_KEY` and the PostgreSQL
   credentials.
+
+### SMTP Checks
+
+Run these when invites or password resets are not being delivered:
+
+```bash
+docker compose logs --tail=300 glitchtip | rg -i "invite|email|smtp|reset"
+docker compose logs --tail=300 plane | rg -i "invite|email|smtp|reset"
+docker compose exec -T glitchtip env | rg '^EMAIL_URL='
+docker compose exec -T plane env | rg -i 'EMAIL_|SMTP'
+```
+
+If GlitchTip still uses `consolemail://`, invitation links are written to logs.
+Extract and clean wrapped links with:
+
+```bash
+docker compose logs --tail=500 glitchtip \
+| perl -pe 's/=\n//g; s/=3D/=/g' \
+| rg -o 'https://issues\.bobadilla\.tech/(accept|profile/confirm-email)/[^" ]+'
+```
 
 ### One-Command Recovery
 
