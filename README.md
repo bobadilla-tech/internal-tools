@@ -32,12 +32,16 @@ Self-hosted internal tools platform for GlitchTip, Plane, and n8n behind Caddy.
    to matching `.env` files.
 3. Point `issues.bobadilla.tech`, `tasks.bobadilla.tech`, and
    `flows.bobadilla.tech` at the VPS.
-4. Run `./scripts/generate-secrets.sh --apply` to
-   populate the generated secrets.
+4. Run `./scripts/generate-secrets.sh --apply` to populate the generated
+   secrets.
 5. Run `docker compose up -d` from the repository root.
 
 GlitchTip is exposed on `issues.bobadilla.tech`, Plane on
 `tasks.bobadilla.tech`, and n8n on `flows.bobadilla.tech`.
+
+GlitchTip uses `consolemail://` by default in this repo so signup emails are
+written to the container logs instead of requiring SMTP. Swap `EMAIL_URL` in
+`services/glitchtip.env` if you want real outbound mail.
 
 ## Notes
 

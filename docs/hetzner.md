@@ -27,7 +27,8 @@ Wait for DNS propagation before expecting TLS certificates.
 
 ## 3. Bootstrap the Host
 
-Important: paste only the commands below. Do not paste shell prompts like `root@host:~#` or command output lines.
+Important: paste only the commands below. Do not paste shell prompts like
+`root@host:~#` or command output lines.
 
 SSH into the server as root or a sudo user:
 

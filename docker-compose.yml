@@ -92,14 +92,14 @@ services:
     command:
       - -c
       - |
-        set -eu
-        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do
-          sleep 2
-        done
-        mc mb --ignore-existing local/"$$PLANE_BUCKET"
-        mc mb --ignore-existing local/"$$GLITCHTIP_BUCKET"
-        mc anonymous set download local/"$$PLANE_BUCKET" || true
-        mc anonymous set download local/"$$GLITCHTIP_BUCKET" || true
+          set -eu
+          until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do
+            sleep 2
+          done
+          mc mb --ignore-existing local/"$$PLANE_BUCKET"
+          mc mb --ignore-existing local/"$$GLITCHTIP_BUCKET"
+          mc anonymous set download local/"$$PLANE_BUCKET" || true
+          mc anonymous set download local/"$$GLITCHTIP_BUCKET" || true
 
   glitchtip:
     image: ${GLITCHTIP_IMAGE}
