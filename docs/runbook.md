@@ -93,3 +93,19 @@ This script:
 - reconciles app roles/databases against `.env` passwords,
 - resets only n8n local state to avoid key mismatch loops,
 - recreates `n8n`, `glitchtip`, and `caddy`, then starts `plane`.
+
+### Plane Local Snapshot Workaround
+
+If Plane is already working and the upstream image tag is broken, you can keep
+the same running version by snapshotting the live container into a local image
+and then recreating Plane from that local image:
+
+```bash
+docker commit internal-tools-plane-1 plane-aio-community:working
+sed -i 's#^PLANE_IMAGE=.*#PLANE_IMAGE=plane-aio-community:working#' .env
+docker compose up -d --force-recreate plane
+```
+
+Use this only to reload Plane env changes without changing Plane's application
+version. It preserves the current container's config, which is why it works
+better than `docker import`.
