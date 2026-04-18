@@ -5,6 +5,14 @@ import os
 for pyc in glob.glob("/app/backend/plane/settings/__pycache__/production.*.pyc"):
     os.unlink(pyc)
 
+# Prevent start.sh from forcing USE_MINIO=0 so presigned URLs use the public domain
+with open("/app/start.sh") as f:
+    sh = f.read()
+if 'update_env_value "USE_MINIO" "0"' in sh:
+    sh = sh.replace('update_env_value "USE_MINIO" "0"', '# update_env_value "USE_MINIO" "0"  # patched: keep USE_MINIO from env')
+    with open("/app/start.sh", "w") as f:
+        f.write(sh)
+
 patch = """
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
