@@ -1,4 +1,9 @@
+import glob
 import os
+
+# Remove stale pyc so the patched .py is recompiled
+for pyc in glob.glob("/app/backend/plane/settings/__pycache__/production.*.pyc"):
+    os.unlink(pyc)
 
 patch = """
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
