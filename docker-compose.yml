@@ -173,6 +173,7 @@ services:
   mattermost:
     image: ${MATTERMOST_IMAGE}
     restart: unless-stopped
+    command: mattermost server
     environment:
       MM_SQLSETTINGS_DRIVERNAME: postgres
       MM_SQLSETTINGS_DATASOURCE: postgres://${MATTERMOST_DB_USER}:${MATTERMOST_DB_PASSWORD}@postgres:5432/${MATTERMOST_DB_NAME}?sslmode=disable
