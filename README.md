@@ -1,6 +1,6 @@
-# internal-tools
+# Self-Hosted Internal Tools
 
-Self-hosted internal tools platform for GlitchTip, Plane, and n8n behind Caddy.
+[Bobadilla Technologies](https://bobadilla.tech) self-hosted internal tools.
 
 ## Layout
 
@@ -22,29 +22,19 @@ Self-hosted internal tools platform for GlitchTip, Plane, and n8n behind Caddy.
 ## Quick Start
 
 1. Copy
-   [.env.example](/Users/eliazbobadilla/Documents/internal-tools/.env.example)
-   to [.env](/Users/eliazbobadilla/Documents/internal-tools/.env).
+   [.env.example](.env.example)
+   to [.env](.env).
 2. Copy the service templates from
-   [services/glitchtip.env.example](/Users/eliazbobadilla/Documents/internal-tools/services/glitchtip.env.example),
-   [services/plane.env.example](/Users/eliazbobadilla/Documents/internal-tools/services/plane.env.example),
+   [services/glitchtip.env.example](./services/glitchtip.env.example),
+   [services/plane.env.example](./services/plane.env.example),
    and
-   [services/n8n.env.example](/Users/eliazbobadilla/Documents/internal-tools/services/n8n.env.example)
+   [services/n8n.env.example](./services/n8n.env.example)
    to matching `.env` files.
 3. Point `issues.bobadilla.tech`, `tasks.bobadilla.tech`, and
    `flows.bobadilla.tech` at the VPS.
 4. Run `./scripts/generate-secrets.sh --apply` to populate the generated
    secrets.
 5. Run `docker compose up -d` from the repository root.
-
-GlitchTip is exposed on `issues.bobadilla.tech`, Plane on
-`tasks.bobadilla.tech`, and n8n on `flows.bobadilla.tech`.
-
-GlitchTip uses `consolemail://` by default in this repo so signup emails are
-written to the container logs instead of requiring SMTP. Swap `EMAIL_URL` in
-`services/glitchtip.env` if you want real outbound mail.
-
-Plane also requires SMTP variables in `services/plane.env` for invite and
-password reset email delivery. See `docs/setup.md` for a Resend SMTP example.
 
 ## Notes
 

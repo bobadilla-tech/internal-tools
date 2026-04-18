@@ -97,16 +97,16 @@ services:
     command:
       - -c
       - |
-        set -eu
-        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do
-          sleep 2
-        done
-        mc mb --ignore-existing local/"$$PLANE_BUCKET"
-        mc mb --ignore-existing local/"$$GLITCHTIP_BUCKET"
-        mc anonymous set download local/"$$PLANE_BUCKET" || true
-        mc anonymous set download local/"$$GLITCHTIP_BUCKET" || true
-        mc admin user add local "$$PLANE_AWS_ACCESS_KEY_ID" "$$PLANE_AWS_SECRET_ACCESS_KEY" 2>/dev/null || true
-        mc admin policy attach local readwrite --user "$$PLANE_AWS_ACCESS_KEY_ID" 2>/dev/null || true
+          set -eu
+          until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do
+            sleep 2
+          done
+          mc mb --ignore-existing local/"$$PLANE_BUCKET"
+          mc mb --ignore-existing local/"$$GLITCHTIP_BUCKET"
+          mc anonymous set download local/"$$PLANE_BUCKET" || true
+          mc anonymous set download local/"$$GLITCHTIP_BUCKET" || true
+          mc admin user add local "$$PLANE_AWS_ACCESS_KEY_ID" "$$PLANE_AWS_SECRET_ACCESS_KEY" 2>/dev/null || true
+          mc admin policy attach local readwrite --user "$$PLANE_AWS_ACCESS_KEY_ID" 2>/dev/null || true
 
   glitchtip:
     image: ${GLITCHTIP_IMAGE}
@@ -131,9 +131,9 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        cp /plane.env-src /plane.env
-        python3 /scripts/patch-plane-settings.py
-        exec /app/start.sh
+          cp /plane.env-src /plane.env
+          python3 /scripts/patch-plane-settings.py
+          exec /app/start.sh
     env_file:
       - ./services/plane.env
     depends_on:

@@ -68,10 +68,10 @@ docker compose exec -T glitchtip env | grep '^EMAIL_URL='
 
 #### How Plane email actually works
 
-Plane stores SMTP config in its `InstanceConfiguration` database table —
-**not** in `services/plane.env`. The env vars in plane.env are only used as
-fallback defaults when the DB rows are empty. The Celery worker reads
-configuration via `get_email_configuration()` which queries the DB first.
+Plane stores SMTP config in its `InstanceConfiguration` database table — **not**
+in `services/plane.env`. The env vars in plane.env are only used as fallback
+defaults when the DB rows are empty. The Celery worker reads configuration via
+`get_email_configuration()` which queries the DB first.
 
 Check what the DB currently has:
 
@@ -113,13 +113,13 @@ for key, val in updates.items():
 ```
 
 Important notes:
+
 - `EMAIL_HOST_PASSWORD` must be stored **encrypted** using `encrypt_data()`.
   Storing plain text will cause `InvalidToken` errors at send time.
-- `EMAIL_USE_TLS` must be `"1"` (not `"true"`). The task does a literal
-  `== "1"` check.
-- The sending domain (`internal.bobadilla.tech`) must be verified in the
-  Resend dashboard before emails will go through. DNS propagation can take
-  a few hours.
+- `EMAIL_USE_TLS` must be `"1"` (not `"true"`). The task does a literal `== "1"`
+  check.
+- The sending domain (`internal.bobadilla.tech`) must be verified in the Resend
+  dashboard before emails will go through. DNS propagation can take a few hours.
 
 #### GlitchTip SMTP
 
@@ -186,15 +186,17 @@ version.
 ### MinIO root password
 
 MinIO stores its root credentials in the data volume on first init. The
-`MINIO_ROOT_PASSWORD` in `.env` must match whatever is in the volume — they
-can drift if the stack was initialized with a different password.
+`MINIO_ROOT_PASSWORD` in `.env` must match whatever is in the volume — they can
+drift if the stack was initialized with a different password.
 
 To find the actual password:
+
 ```bash
 docker compose exec -T minio env | grep MINIO_ROOT_PASSWORD
 ```
 
 Then sync `.env`:
+
 ```bash
 sed -i "s#^MINIO_ROOT_PASSWORD=.*#MINIO_ROOT_PASSWORD=<actual_password>#" .env
 ```
@@ -209,27 +211,27 @@ docker compose up --force-recreate minio-init
 ```
 
 This creates the `uploads` and `glitchtip-files` buckets, sets public-download
-policy, and creates the `plane-access` user with readwrite permissions.
-If minio-init still fails, check that `MINIO_ROOT_PASSWORD` in `.env` matches
-the volume (see above).
+policy, and creates the `plane-access` user with readwrite permissions. If
+minio-init still fails, check that `MINIO_ROOT_PASSWORD` in `.env` matches the
+volume (see above).
 
 ### Plane Image Uploads
 
-Plane's `start.sh` hardcodes `USE_MINIO=0` in its own env file, which causes
-the storage backend to generate presigned upload URLs pointing to
+Plane's `start.sh` hardcodes `USE_MINIO=0` in its own env file, which causes the
+storage backend to generate presigned upload URLs pointing to
 `http://minio:9000` — an internal address the browser can never reach.
 
 The fix has two parts (both already wired in):
 
-1. **`scripts/patch-plane-settings.py`** runs at container startup and
-   comments out the `USE_MINIO=0` line in `start.sh`, keeping `USE_MINIO=1`
-   from the container environment.  With `USE_MINIO=1`, the storage backend
-   generates presigned POST URLs using `request.get_host()` —
-   i.e. `https://tasks.bobadilla.tech/uploads`.
+1. **`scripts/patch-plane-settings.py`** runs at container startup and comments
+   out the `USE_MINIO=0` line in `start.sh`, keeping `USE_MINIO=1` from the
+   container environment. With `USE_MINIO=1`, the storage backend generates
+   presigned POST URLs using `request.get_host()` — i.e.
+   `https://tasks.bobadilla.tech/uploads`.
 
-2. **`Caddyfile`** routes `handle /uploads*` on `tasks.bobadilla.tech`
-   directly to `minio:9000`, so the browser's upload POST reaches MinIO
-   through the same public domain.
+2. **`Caddyfile`** routes `handle /uploads*` on `tasks.bobadilla.tech` directly
+   to `minio:9000`, so the browser's upload POST reaches MinIO through the same
+   public domain.
 
 If image uploads break again after a Plane image update, check:
 
@@ -253,9 +255,9 @@ docker compose up -d --force-recreate plane
 
 ### Plane God Mode Access
 
-God Mode (`/god-mode/`) uses a separate `InstanceAdmin` model — not the
-regular `is_superuser` / `is_staff` flags. If login fails with
-"Authentication failed", add the user as a verified instance admin:
+God Mode (`/god-mode/`) uses a separate `InstanceAdmin` model — not the regular
+`is_superuser` / `is_staff` flags. If login fails with "Authentication failed",
+add the user as a verified instance admin:
 
 ```bash
 docker compose exec -T plane sh -c 'cd /app/backend && python3 -c "
@@ -271,24 +273,26 @@ print(\"done\")
 "'
 ```
 
-Then log in at `https://tasks.bobadilla.tech/god-mode/` with the regular
-Plane account password.
+Then log in at `https://tasks.bobadilla.tech/god-mode/` with the regular Plane
+account password.
 
 ## Mattermost
 
 Mattermost runs at `https://chat.bobadilla.tech` (port 8065, proxied by Caddy).
-It uses the shared PostgreSQL (`mattermost_db`) and a local Docker volume for file storage.
+It uses the shared PostgreSQL (`mattermost_db`) and a local Docker volume for
+file storage.
 
 ### First-Run Setup
 
-On a fresh deploy, visit `https://chat.bobadilla.tech` and complete the setup wizard
-to create the admin account. No post-deploy DB commands needed.
+On a fresh deploy, visit `https://chat.bobadilla.tech` and complete the setup
+wizard to create the admin account. No post-deploy DB commands needed.
 
 ### Adding Mattermost DB on an Existing Postgres Volume
 
-Docker init scripts only run on an empty volume. If `postgres_data` already exists,
-create the database manually before starting Mattermost. Run each statement as a
-separate `-c` call — `CREATE DATABASE` cannot run inside a transaction block:
+Docker init scripts only run on an empty volume. If `postgres_data` already
+exists, create the database manually before starting Mattermost. Run each
+statement as a separate `-c` call — `CREATE DATABASE` cannot run inside a
+transaction block:
 
 ```bash
 MATTERMOST_DB_PASSWORD=$(grep ^MATTERMOST_DB_PASSWORD .env | cut -d= -f2)
@@ -301,8 +305,9 @@ docker compose exec -T postgres psql -U postgres_admin -d postgres \
 docker compose up -d mattermost
 ```
 
-If Mattermost fails with `password authentication failed`, the password in `.env` may
-contain a trailing `=` (base64 padding) which breaks the PostgreSQL URL. Reset it:
+If Mattermost fails with `password authentication failed`, the password in
+`.env` may contain a trailing `=` (base64 padding) which breaks the PostgreSQL
+URL. Reset it:
 
 ```bash
 NEW_PW=$(openssl rand -base64 32 | tr -d '\n=' | tr '/+' 'ab' | cut -c1-48)
@@ -312,7 +317,8 @@ docker compose exec -T postgres psql -U postgres_admin -d postgres \
 docker compose up -d mattermost
 ```
 
-The `generate-secrets.sh` script has been fixed to never produce `=` in passwords.
+The `generate-secrets.sh` script has been fixed to never produce `=` in
+passwords.
 
 ### Rename Plane Workspace Slug
 
@@ -334,9 +340,11 @@ After a fresh deploy (new server or wiped volumes), complete these steps once:
    required on every fresh Postgres volume because the InstanceConfiguration
    table starts empty and env-var fallbacks are not reliable.
 
-3. **Verify MinIO buckets and user exist**: run `docker compose up
-   --force-recreate minio-init` if Plane reports image upload errors on first
-   use. This creates the `uploads` bucket and `plane-access` MinIO user.
+3. **Verify MinIO buckets and user exist**: run
+   `docker compose up
+   --force-recreate minio-init` if Plane reports image
+   upload errors on first use. This creates the `uploads` bucket and
+   `plane-access` MinIO user.
 
 4. **Mattermost first-run**: visit `https://chat.bobadilla.tech` and complete
    the setup wizard to create the admin account.
