@@ -6,7 +6,7 @@ ENV_FILE="$ROOT_DIR/.env"
 SERVICES_DIR="$ROOT_DIR/services"
 
 generate_secret() {
-  openssl rand -base64 32 | tr -d '\n' | tr '/+' 'ab' | cut -c1-48
+  openssl rand -base64 32 | tr -d '\n=' | tr '/+' 'ab' | cut -c1-48
 }
 
 
