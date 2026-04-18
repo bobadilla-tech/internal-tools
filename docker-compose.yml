@@ -182,6 +182,7 @@ services:
       MM_FILESETTINGS_DIRECTORY: /mattermost/data/
       MM_PLUGINSETTINGS_ENABLEUPLOADS: "true"
       MM_LOGSETTINGS_CONSOLELEVEL: INFO
+      MM_SERVICESETTINGS_ENABLEOPENSERVER: "false"
     depends_on:
       postgres:
         condition: service_healthy

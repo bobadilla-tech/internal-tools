@@ -287,17 +287,32 @@ to create the admin account. No post-deploy DB commands needed.
 ### Adding Mattermost DB on an Existing Postgres Volume
 
 Docker init scripts only run on an empty volume. If `postgres_data` already exists,
-create the database manually before starting Mattermost:
+create the database manually before starting Mattermost. Run each statement as a
+separate `-c` call — `CREATE DATABASE` cannot run inside a transaction block:
 
 ```bash
 MATTERMOST_DB_PASSWORD=$(grep ^MATTERMOST_DB_PASSWORD .env | cut -d= -f2)
-docker compose exec -T postgres psql -U postgres_admin -d postgres -c "
-  CREATE ROLE mattermost_user LOGIN PASSWORD '$MATTERMOST_DB_PASSWORD';
-  CREATE DATABASE mattermost_db OWNER mattermost_user;
-  GRANT ALL PRIVILEGES ON DATABASE mattermost_db TO mattermost_user;
-"
+docker compose exec -T postgres psql -U postgres_admin -d postgres \
+  -c "CREATE ROLE mattermost_user LOGIN PASSWORD '$MATTERMOST_DB_PASSWORD';"
+docker compose exec -T postgres psql -U postgres_admin -d postgres \
+  -c "CREATE DATABASE mattermost_db OWNER mattermost_user;"
+docker compose exec -T postgres psql -U postgres_admin -d postgres \
+  -c "GRANT ALL PRIVILEGES ON DATABASE mattermost_db TO mattermost_user;"
 docker compose up -d mattermost
 ```
+
+If Mattermost fails with `password authentication failed`, the password in `.env` may
+contain a trailing `=` (base64 padding) which breaks the PostgreSQL URL. Reset it:
+
+```bash
+NEW_PW=$(openssl rand -base64 32 | tr -d '\n=' | tr '/+' 'ab' | cut -c1-48)
+sed -i "s#^MATTERMOST_DB_PASSWORD=.*#MATTERMOST_DB_PASSWORD=$NEW_PW#" .env
+docker compose exec -T postgres psql -U postgres_admin -d postgres \
+  -c "ALTER ROLE mattermost_user PASSWORD '$NEW_PW';"
+docker compose up -d mattermost
+```
+
+The `generate-secrets.sh` script has been fixed to never produce `=` in passwords.
 
 ### Rename Plane Workspace Slug
 
