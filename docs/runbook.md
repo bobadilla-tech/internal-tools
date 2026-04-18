@@ -213,6 +213,44 @@ policy, and creates the `plane-access` user with readwrite permissions.
 If minio-init still fails, check that `MINIO_ROOT_PASSWORD` in `.env` matches
 the volume (see above).
 
+### Plane Image Uploads
+
+Plane's `start.sh` hardcodes `USE_MINIO=0` in its own env file, which causes
+the storage backend to generate presigned upload URLs pointing to
+`http://minio:9000` — an internal address the browser can never reach.
+
+The fix has two parts (both already wired in):
+
+1. **`scripts/patch-plane-settings.py`** runs at container startup and
+   comments out the `USE_MINIO=0` line in `start.sh`, keeping `USE_MINIO=1`
+   from the container environment.  With `USE_MINIO=1`, the storage backend
+   generates presigned POST URLs using `request.get_host()` —
+   i.e. `https://tasks.bobadilla.tech/uploads`.
+
+2. **`Caddyfile`** routes `handle /uploads*` on `tasks.bobadilla.tech`
+   directly to `minio:9000`, so the browser's upload POST reaches MinIO
+   through the same public domain.
+
+If image uploads break again after a Plane image update, check:
+
+```bash
+# Confirm USE_MINIO=1 in the gunicorn process
+docker compose exec -T plane sh -c 'cat /proc/$(pgrep -f gunicorn | head -1)/environ | tr "\0" "\n" | grep USE_MINIO'
+
+# Confirm the patch ran
+docker compose exec -T plane sh -c 'grep "patched" /app/start.sh'
+
+# Confirm Caddy routes /uploads to MinIO (should return XML, not Plane HTML)
+curl -s https://tasks.bobadilla.tech/uploads | head -3
+```
+
+If USE_MINIO is 0, force-recreate the plane container (the patch runs at
+startup):
+
+```bash
+docker compose up -d --force-recreate plane
+```
+
 ## Fresh Install — Post-Deploy Checklist
 
 After a fresh deploy (new server or wiped volumes), complete these steps once:
@@ -224,5 +262,6 @@ After a fresh deploy (new server or wiped volumes), complete these steps once:
    required on every fresh Postgres volume because the InstanceConfiguration
    table starts empty and env-var fallbacks are not reliable.
 
-3. **Verify MinIO buckets exist**: run `docker compose up --force-recreate
-   minio-init` if Plane reports image upload errors on first use.
+3. **Verify MinIO buckets and user exist**: run `docker compose up
+   --force-recreate minio-init` if Plane reports image upload errors on first
+   use. This creates the `uploads` bucket and `plane-access` MinIO user.
