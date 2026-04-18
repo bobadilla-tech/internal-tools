@@ -62,10 +62,72 @@ persistent volumes.
 Run these when invites or password resets are not being delivered:
 
 ```bash
-docker compose logs --tail=300 glitchtip | rg -i "invite|email|smtp|reset"
-docker compose logs --tail=300 plane | rg -i "invite|email|smtp|reset"
-docker compose exec -T glitchtip env | rg '^EMAIL_URL='
-docker compose exec -T plane env | rg -i 'EMAIL_|SMTP'
+docker compose exec -T plane sh -c 'tail -50 /app/logs/error/worker.err.log' | grep -i "email\|smtp\|530\|sent"
+docker compose exec -T glitchtip env | grep '^EMAIL_URL='
+```
+
+#### How Plane email actually works
+
+Plane stores SMTP config in its `InstanceConfiguration` database table —
+**not** in `services/plane.env`. The env vars in plane.env are only used as
+fallback defaults when the DB rows are empty. The Celery worker reads
+configuration via `get_email_configuration()` which queries the DB first.
+
+Check what the DB currently has:
+
+```bash
+docker compose exec -T plane sh -c 'cd /app/backend && python3 -c "
+import os, django
+os.environ[\"DJANGO_SETTINGS_MODULE\"] = \"plane.settings.production\"
+django.setup()
+from plane.license.utils.instance_value import get_email_configuration
+print(get_email_configuration())
+"'
+```
+
+If HOST, USER, PASSWORD, or FROM are empty, configure them:
+
+```bash
+docker compose exec -T plane sh -c 'cd /app/backend && python3 -c "
+import os, django
+os.environ[\"DJANGO_SETTINGS_MODULE\"] = \"plane.settings.production\"
+django.setup()
+from plane.license.models import InstanceConfiguration
+from plane.license.utils.encryption import encrypt_data
+
+updates = {
+    \"EMAIL_HOST\": \"smtp.resend.com\",
+    \"EMAIL_HOST_USER\": \"resend\",
+    \"EMAIL_HOST_PASSWORD\": encrypt_data(\"<resend-api-key>\"),
+    \"EMAIL_PORT\": \"587\",
+    \"EMAIL_USE_TLS\": \"1\",
+    \"EMAIL_USE_SSL\": \"0\",
+    \"EMAIL_FROM\": \"plane@internal.bobadilla.tech\",
+}
+for key, val in updates.items():
+    n = InstanceConfiguration.objects.filter(key=key).update(value=val)
+    if not n:
+        InstanceConfiguration.objects.create(key=key, value=val)
+    print(key, \"ok\")
+"'
+```
+
+Important notes:
+- `EMAIL_HOST_PASSWORD` must be stored **encrypted** using `encrypt_data()`.
+  Storing plain text will cause `InvalidToken` errors at send time.
+- `EMAIL_USE_TLS` must be `"1"` (not `"true"`). The task does a literal
+  `== "1"` check.
+- The sending domain (`internal.bobadilla.tech`) must be verified in the
+  Resend dashboard before emails will go through. DNS propagation can take
+  a few hours.
+
+#### GlitchTip SMTP
+
+GlitchTip uses `EMAIL_URL` in `services/glitchtip.env`:
+
+```
+EMAIL_URL=smtp://resend:<resend_api_key>@smtp.resend.com:587/?tls=True
+DEFAULT_FROM_EMAIL=glitchtip@internal.bobadilla.tech
 ```
 
 If GlitchTip still uses `consolemail://`, invitation links are written to logs.
@@ -74,7 +136,7 @@ Extract and clean wrapped links with:
 ```bash
 docker compose logs --tail=500 glitchtip \
 | perl -pe 's/=\n//g; s/=3D/=/g' \
-| rg -o 'https://issues\.bobadilla\.tech/(accept|profile/confirm-email)/[^" ]+'
+| grep -o 'https://issues\.bobadilla\.tech/(accept|profile/confirm-email)/[^" ]+'
 ```
 
 ### One-Command Recovery
@@ -150,3 +212,17 @@ This creates the `uploads` and `glitchtip-files` buckets, sets public-download
 policy, and creates the `plane-access` user with readwrite permissions.
 If minio-init still fails, check that `MINIO_ROOT_PASSWORD` in `.env` matches
 the volume (see above).
+
+## Fresh Install — Post-Deploy Checklist
+
+After a fresh deploy (new server or wiped volumes), complete these steps once:
+
+1. **Verify the sending domain** in Resend: `internal.bobadilla.tech` must show
+   status "Domain verified" before any email will go through.
+
+2. **Configure Plane email in the DB** (see SMTP section above). This is
+   required on every fresh Postgres volume because the InstanceConfiguration
+   table starts empty and env-var fallbacks are not reliable.
+
+3. **Verify MinIO buckets exist**: run `docker compose up --force-recreate
+   minio-init` if Plane reports image upload errors on first use.
