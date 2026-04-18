@@ -251,6 +251,29 @@ startup):
 docker compose up -d --force-recreate plane
 ```
 
+### Plane God Mode Access
+
+God Mode (`/god-mode/`) uses a separate `InstanceAdmin` model — not the
+regular `is_superuser` / `is_staff` flags. If login fails with
+"Authentication failed", add the user as a verified instance admin:
+
+```bash
+docker compose exec -T plane sh -c 'cd /app/backend && python3 -c "
+import os,django
+os.environ[\"DJANGO_SETTINGS_MODULE\"]=\"plane.settings.production\"
+django.setup()
+from plane.license.models import InstanceAdmin, Instance
+from plane.db.models import User
+u = User.objects.get(email=\"eliaz@bobadilla.tech\")
+inst = Instance.objects.first()
+InstanceAdmin.objects.update_or_create(user=u, instance=inst, defaults={\"role\":20,\"is_verified\":True})
+print(\"done\")
+"'
+```
+
+Then log in at `https://tasks.bobadilla.tech/god-mode/` with the regular
+Plane account password.
+
 ## Fresh Install — Post-Deploy Checklist
 
 After a fresh deploy (new server or wiped volumes), complete these steps once:
