@@ -125,6 +125,11 @@ services:
   plane:
     image: ${PLANE_IMAGE}
     restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        cp /plane.env-src /plane.env
+        exec /app/start.sh
     env_file:
       - ./services/plane.env
     depends_on:
@@ -139,7 +144,7 @@ services:
     expose:
       - "80"
     volumes:
-      - ./services/plane.env:/plane.env
+      - ./services/plane.env:/plane.env-src:ro
       - type: "volume"
         source: "plane_data"
         target: "/app/data"
