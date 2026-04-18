@@ -16,7 +16,7 @@ cp .env.example .env
 cp services/glitchtip.env.example services/glitchtip.env
 cp services/plane.env.example services/plane.env
 cp services/n8n.env.example services/n8n.env
-./scripts/generate-secrets.sh <caddy-basic-auth-password> --apply
+./scripts/generate-secrets.sh --apply
 ./scripts/update.sh
 ```
 

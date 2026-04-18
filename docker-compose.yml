@@ -213,8 +213,6 @@ services:
       DOMAIN_TASKS: ${DOMAIN_TASKS}
       DOMAIN_FLOWS: ${DOMAIN_FLOWS}
       DOMAIN_CHAT: ${DOMAIN_CHAT}
-      CADDY_BASIC_AUTH_USER: ${CADDY_BASIC_AUTH_USER}
-      CADDY_BASIC_AUTH_HASH: ${CADDY_BASIC_AUTH_HASH}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

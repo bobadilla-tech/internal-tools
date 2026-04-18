@@ -9,16 +9,6 @@ generate_secret() {
   openssl rand -base64 32 | tr -d '\n' | tr '/+' 'ab' | cut -c1-48
 }
 
-hash_caddy_password() {
-  password=$1
-
-  if command -v caddy >/dev/null 2>&1; then
-    printf '%s' "$password" | caddy hash-password --plaintext
-    return
-  fi
-
-  docker run --rm caddy:2.8-alpine caddy hash-password --plaintext "$password"
-}
 
 get_env_value() {
   key=$1
@@ -80,38 +70,22 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-AUTH_PASSWORD=""
 APPLY=""
 
 for arg in "$@"; do
   if [ "$arg" = "--apply" ]; then
     APPLY="--apply"
-  elif [ -z "$AUTH_PASSWORD" ]; then
-    AUTH_PASSWORD=$arg
   else
-    echo "Usage: $0 [caddy-basic-auth-password] [--apply]" >&2
+    echo "Usage: $0 [--apply]" >&2
     exit 1
   fi
 done
-
-CADDY_HASH_ESCAPED=""
-if [ -n "$AUTH_PASSWORD" ]; then
-  CADDY_HASH=$(hash_caddy_password "$AUTH_PASSWORD")
-  CADDY_HASH_ESCAPED=$(printf '%s' "$CADDY_HASH" | sed 's/[$]/$$/g')
-fi
 
 TMP_FILE=$(mktemp)
 trap 'rm -f "$TMP_FILE"' EXIT
 
 while IFS= read -r line || [ -n "$line" ]; do
   case $line in
-    CADDY_BASIC_AUTH_HASH=*)
-      if [ -n "$CADDY_HASH_ESCAPED" ]; then
-        printf 'CADDY_BASIC_AUTH_HASH=%s\n' "$CADDY_HASH_ESCAPED" >> "$TMP_FILE"
-      else
-        printf '%s\n' "$line" >> "$TMP_FILE"
-      fi
-      ;;
     POSTGRES_ADMIN_PASSWORD=change-me-superuser)
       printf 'POSTGRES_ADMIN_PASSWORD=%s\n' "$(generate_secret)" >> "$TMP_FILE"
       ;;
