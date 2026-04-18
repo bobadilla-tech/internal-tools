@@ -129,6 +129,7 @@ services:
     command:
       - |
         cp /plane.env-src /plane.env
+        python3 /scripts/patch-plane-settings.py
         exec /app/start.sh
     env_file:
       - ./services/plane.env
@@ -145,6 +146,7 @@ services:
       - "80"
     volumes:
       - ./services/plane.env:/plane.env-src:ro
+      - ./scripts/patch-plane-settings.py:/scripts/patch-plane-settings.py:ro
       - type: "volume"
         source: "plane_data"
         target: "/app/data"
