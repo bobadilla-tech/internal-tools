@@ -148,6 +148,9 @@ while IFS= read -r line || [ -n "$line" ]; do
     N8N_ENCRYPTION_KEY=change-me-n8n-encryption-key)
       printf 'N8N_ENCRYPTION_KEY=%s\n' "$(generate_secret)" >> "$TMP_FILE"
       ;;
+    MATTERMOST_DB_PASSWORD=change-me-mattermost-db-password)
+      printf 'MATTERMOST_DB_PASSWORD=%s\n' "$(generate_secret)" >> "$TMP_FILE"
+      ;;
     *)
       printf '%s\n' "$line" >> "$TMP_FILE"
       ;;

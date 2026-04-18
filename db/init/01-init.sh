@@ -35,3 +35,6 @@ create_database "$PLANE_DB_NAME" "$PLANE_DB_USER"
 
 create_role "$N8N_DB_USER" "$N8N_DB_PASSWORD"
 create_database "$N8N_DB_NAME" "$N8N_DB_USER"
+
+create_role "$MATTERMOST_DB_USER" "$MATTERMOST_DB_PASSWORD"
+create_database "$MATTERMOST_DB_NAME" "$MATTERMOST_DB_USER"

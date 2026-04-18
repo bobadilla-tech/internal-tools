@@ -16,6 +16,9 @@ services:
       N8N_DB_NAME: ${N8N_DB_NAME}
       N8N_DB_USER: ${N8N_DB_USER}
       N8N_DB_PASSWORD: ${N8N_DB_PASSWORD}
+      MATTERMOST_DB_NAME: ${MATTERMOST_DB_NAME}
+      MATTERMOST_DB_USER: ${MATTERMOST_DB_USER}
+      MATTERMOST_DB_PASSWORD: ${MATTERMOST_DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
@@ -167,6 +170,28 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
+  mattermost:
+    image: ${MATTERMOST_IMAGE}
+    restart: unless-stopped
+    environment:
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://${MATTERMOST_DB_USER}:${MATTERMOST_DB_PASSWORD}@postgres:5432/${MATTERMOST_DB_NAME}?sslmode=disable
+      MM_SERVICESETTINGS_SITEURL: https://${DOMAIN_CHAT}
+      MM_FILESETTINGS_DRIVERNAME: local
+      MM_FILESETTINGS_DIRECTORY: /mattermost/data/
+      MM_PLUGINSETTINGS_ENABLEUPLOADS: "true"
+      MM_LOGSETTINGS_CONSOLELEVEL: INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8065"
+    volumes:
+      - mattermost_data:/mattermost/data
+      - mattermost_logs:/mattermost/logs
+      - mattermost_config:/mattermost/config
+      - mattermost_plugins:/mattermost/plugins
+
   caddy:
     image: caddy:2.8-alpine
     restart: unless-stopped
@@ -177,6 +202,8 @@ services:
         condition: service_started
       n8n:
         condition: service_started
+      mattermost:
+        condition: service_started
     ports:
       - "80:80"
       - "443:443"
@@ -185,6 +212,7 @@ services:
       DOMAIN_ERRORS: ${DOMAIN_ERRORS}
       DOMAIN_TASKS: ${DOMAIN_TASKS}
       DOMAIN_FLOWS: ${DOMAIN_FLOWS}
+      DOMAIN_CHAT: ${DOMAIN_CHAT}
       CADDY_BASIC_AUTH_USER: ${CADDY_BASIC_AUTH_USER}
       CADDY_BASIC_AUTH_HASH: ${CADDY_BASIC_AUTH_HASH}
     volumes:
@@ -202,3 +230,7 @@ volumes:
   plane_logs:
   caddy_data:
   caddy_config:
+  mattermost_data:
+  mattermost_logs:
+  mattermost_config:
+  mattermost_plugins:

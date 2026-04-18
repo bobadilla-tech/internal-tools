@@ -19,3 +19,8 @@
   encode zstd gzip
   reverse_proxy n8n:5678
 }
+
+{$DOMAIN_CHAT} {
+  encode zstd gzip
+  reverse_proxy mattermost:8065
+}

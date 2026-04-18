@@ -274,6 +274,40 @@ print(\"done\")
 Then log in at `https://tasks.bobadilla.tech/god-mode/` with the regular
 Plane account password.
 
+## Mattermost
+
+Mattermost runs at `https://chat.bobadilla.tech` (port 8065, proxied by Caddy).
+It uses the shared PostgreSQL (`mattermost_db`) and a local Docker volume for file storage.
+
+### First-Run Setup
+
+On a fresh deploy, visit `https://chat.bobadilla.tech` and complete the setup wizard
+to create the admin account. No post-deploy DB commands needed.
+
+### Adding Mattermost DB on an Existing Postgres Volume
+
+Docker init scripts only run on an empty volume. If `postgres_data` already exists,
+create the database manually before starting Mattermost:
+
+```bash
+MATTERMOST_DB_PASSWORD=$(grep ^MATTERMOST_DB_PASSWORD .env | cut -d= -f2)
+docker compose exec -T postgres psql -U postgres_admin -d postgres -c "
+  CREATE ROLE mattermost_user LOGIN PASSWORD '$MATTERMOST_DB_PASSWORD';
+  CREATE DATABASE mattermost_db OWNER mattermost_user;
+  GRANT ALL PRIVILEGES ON DATABASE mattermost_db TO mattermost_user;
+"
+docker compose up -d mattermost
+```
+
+### Rename Plane Workspace Slug
+
+To rename the default workspace slug (e.g. `agency-core` → `core`):
+
+```bash
+docker compose exec -T postgres psql -U plane_user -d plane_db -c \
+  "UPDATE workspaces SET slug='core', name='Core' WHERE slug='agency-core' RETURNING id, name, slug;"
+```
+
 ## Fresh Install — Post-Deploy Checklist
 
 After a fresh deploy (new server or wiped volumes), complete these steps once:
@@ -288,3 +322,6 @@ After a fresh deploy (new server or wiped volumes), complete these steps once:
 3. **Verify MinIO buckets and user exist**: run `docker compose up
    --force-recreate minio-init` if Plane reports image upload errors on first
    use. This creates the `uploads` bucket and `plane-access` MinIO user.
+
+4. **Mattermost first-run**: visit `https://chat.bobadilla.tech` and complete
+   the setup wizard to create the admin account.
