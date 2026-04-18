@@ -96,16 +96,57 @@ This script:
 
 ### Plane Local Snapshot Workaround
 
-If Plane is already working and the upstream image tag is broken, you can keep
-the same running version by snapshotting the live container into a local image
-and then recreating Plane from that local image:
+If Plane is already working and the upstream image tag is broken, snapshot the
+live container with `docker export | docker import` instead of `docker commit`.
+`docker commit` inherits the image's JSON-array VOLUME declaration in a form
+Docker can't parse, causing:
+`invalid mount config for type "volume": invalid mount path: '[/app/data,'`
+
+Use this instead:
 
 ```bash
-docker commit internal-tools-plane-1 plane-aio-community:working
+# Capture the entrypoint from the running container
+CMD=$(docker inspect internal-tools-plane-1 --format='{{json .Config.Cmd}}')
+
+# Export filesystem and reimport clean (no VOLUME metadata)
+docker export internal-tools-plane-1 | docker import \
+  --change "CMD $CMD" \
+  - plane-aio-community:working
+
+# Point .env at the new local image
 sed -i 's#^PLANE_IMAGE=.*#PLANE_IMAGE=plane-aio-community:working#' .env
 docker compose up -d --force-recreate plane
 ```
 
 Use this only to reload Plane env changes without changing Plane's application
-version. It preserves the current container's config, which is why it works
-better than `docker import`.
+version.
+
+### MinIO root password
+
+MinIO stores its root credentials in the data volume on first init. The
+`MINIO_ROOT_PASSWORD` in `.env` must match whatever is in the volume — they
+can drift if the stack was initialized with a different password.
+
+To find the actual password:
+```bash
+docker compose exec -T minio env | grep MINIO_ROOT_PASSWORD
+```
+
+Then sync `.env`:
+```bash
+sed -i "s#^MINIO_ROOT_PASSWORD=.*#MINIO_ROOT_PASSWORD=<actual_password>#" .env
+```
+
+### MinIO bucket / user missing
+
+If Plane reports image upload errors or the `uploads` bucket is missing, run
+minio-init manually (it is idempotent):
+
+```bash
+docker compose up --force-recreate minio-init
+```
+
+This creates the `uploads` and `glitchtip-files` buckets, sets public-download
+policy, and creates the `plane-access` user with readwrite permissions.
+If minio-init still fails, check that `MINIO_ROOT_PASSWORD` in `.env` matches
+the volume (see above).

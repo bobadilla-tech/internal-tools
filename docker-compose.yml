@@ -139,6 +139,7 @@ services:
     expose:
       - "80"
     volumes:
+      - ./services/plane.env:/plane.env
       - type: "volume"
         source: "plane_data"
         target: "/app/data"
