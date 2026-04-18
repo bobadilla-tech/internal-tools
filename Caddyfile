@@ -9,7 +9,7 @@
 
 {$DOMAIN_TASKS} {
   encode zstd gzip
-  handle /uploads/* {
+  handle /uploads* {
     reverse_proxy minio:9000
   }
   reverse_proxy plane:80
