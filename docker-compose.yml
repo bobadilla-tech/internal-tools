@@ -16,6 +16,9 @@ services:
       N8N_DB_NAME: ${N8N_DB_NAME}
       N8N_DB_USER: ${N8N_DB_USER}
       N8N_DB_PASSWORD: ${N8N_DB_PASSWORD}
+      INFISICAL_DB_NAME: ${INFISICAL_DB_NAME}
+      INFISICAL_DB_USER: ${INFISICAL_DB_USER}
+      INFISICAL_DB_PASSWORD: ${INFISICAL_DB_PASSWORD}
       MATTERMOST_DB_NAME: ${MATTERMOST_DB_NAME}
       MATTERMOST_DB_USER: ${MATTERMOST_DB_USER}
       MATTERMOST_DB_PASSWORD: ${MATTERMOST_DB_PASSWORD}
@@ -194,6 +197,19 @@ services:
       - mattermost_config:/mattermost/config
       - mattermost_plugins:/mattermost/plugins
 
+  infisical:
+    image: ${INFISICAL_IMAGE}
+    restart: unless-stopped
+    env_file:
+      - ./services/infisical.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8080"
+
   caddy:
     image: caddy:2.8-alpine
     restart: unless-stopped
@@ -215,6 +231,7 @@ services:
       DOMAIN_TASKS: ${DOMAIN_TASKS}
       DOMAIN_FLOWS: ${DOMAIN_FLOWS}
       DOMAIN_CHAT: ${DOMAIN_CHAT}
+      DOMAIN_SECRETS: ${DOMAIN_SECRETS}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
