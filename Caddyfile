@@ -24,3 +24,8 @@
   encode zstd gzip
   reverse_proxy mattermost:8065
 }
+
+{$DOMAIN_SECRETS} {
+  encode zstd gzip
+  reverse_proxy infisical:8080
+}
