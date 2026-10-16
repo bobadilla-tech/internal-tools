@@ -22,6 +22,7 @@ Create A records to the server IP:
 - `issues.bobadilla.tech`
 - `tasks.bobadilla.tech`
 - `flows.bobadilla.tech`
+- `secrets.bobadilla.tech`
 
 Wait for DNS propagation before expecting TLS certificates.
 
@@ -91,6 +92,7 @@ cp .env.example .env
 cp services/glitchtip.env.example services/glitchtip.env
 cp services/plane.env.example services/plane.env
 cp services/n8n.env.example services/n8n.env
+cp services/infisical.env.example services/infisical.env
 ./scripts/generate-secrets.sh --apply
 ```
 

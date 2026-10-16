@@ -36,6 +36,7 @@ sync_service_envs() {
   glitchtip_env="$SERVICES_DIR/glitchtip.env"
   plane_env="$SERVICES_DIR/plane.env"
   n8n_env="$SERVICES_DIR/n8n.env"
+  infisical_env="$SERVICES_DIR/infisical.env"
 
   glitchtip_db_password=$(get_env_value GLITCHTIP_DB_PASSWORD)
   glitchtip_secret_key=$(get_env_value GLITCHTIP_SECRET_KEY)
@@ -50,6 +51,11 @@ sync_service_envs() {
   n8n_db_password=$(get_env_value N8N_DB_PASSWORD)
   n8n_encryption_key=$(get_env_value N8N_ENCRYPTION_KEY)
 
+  infisical_db_password=$(get_env_value INFISICAL_DB_PASSWORD)
+  infisical_encryption_key=$(get_env_value INFISICAL_ENCRYPTION_KEY)
+  infisical_auth_secret=$(get_env_value INFISICAL_AUTH_SECRET)
+  infisical_domain=$(get_env_value DOMAIN_SECRETS)
+
   set_env_line "$glitchtip_env" SECRET_KEY "$glitchtip_secret_key"
   set_env_line "$glitchtip_env" DATABASE_URL "postgresql://glitchtip_user:${glitchtip_db_password}@postgres:5432/glitchtip_db"
   set_env_line "$glitchtip_env" AWS_SECRET_ACCESS_KEY "$glitchtip_storage_secret"
@@ -63,6 +69,11 @@ sync_service_envs() {
   set_env_line "$n8n_env" N8N_ENCRYPTION_KEY "$n8n_encryption_key"
   set_env_line "$n8n_env" N8N_USER_MANAGEMENT_JWT_SECRET "$n8n_encryption_key"
   set_env_line "$n8n_env" DB_POSTGRESDB_PASSWORD "$n8n_db_password"
+
+  set_env_line "$infisical_env" DB_CONNECTION_URI "postgresql://infisical_user:${infisical_db_password}@postgres:5432/infisical_db"
+  set_env_line "$infisical_env" ENCRYPTION_KEY "$infisical_encryption_key"
+  set_env_line "$infisical_env" AUTH_SECRET "$infisical_auth_secret"
+  set_env_line "$infisical_env" SITE_URL "https://${infisical_domain}"
 }
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -124,6 +135,15 @@ while IFS= read -r line || [ -n "$line" ]; do
       ;;
     MATTERMOST_DB_PASSWORD=change-me-mattermost-db-password)
       printf 'MATTERMOST_DB_PASSWORD=%s\n' "$(generate_secret)" >> "$TMP_FILE"
+      ;;
+    INFISICAL_DB_PASSWORD=change-me-infisical-db-password)
+      printf 'INFISICAL_DB_PASSWORD=%s\n' "$(generate_secret)" >> "$TMP_FILE"
+      ;;
+    INFISICAL_ENCRYPTION_KEY=change-me-infisical-encryption-key)
+      printf 'INFISICAL_ENCRYPTION_KEY=%s\n' "$(openssl rand -hex 16)" >> "$TMP_FILE"
+      ;;
+    INFISICAL_AUTH_SECRET=change-me-infisical-auth-secret)
+      printf 'INFISICAL_AUTH_SECRET=%s\n' "$(openssl rand -base64 32 | tr -d '\n')" >> "$TMP_FILE"
       ;;
     *)
       printf '%s\n' "$line" >> "$TMP_FILE"

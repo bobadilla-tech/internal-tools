@@ -14,6 +14,7 @@ For Hetzner Cloud-specific instructions, follow
    - `issues.bobadilla.tech`
    - `tasks.bobadilla.tech`
    - `flows.bobadilla.tech`
+   - `secrets.bobadilla.tech`
 
 ## Configuration
 
@@ -32,10 +33,11 @@ For Hetzner Cloud-specific instructions, follow
    [services/n8n.env.example](/Users/eliazbobadilla/Documents/internal-tools/services/n8n.env.example)
    to
    [services/n8n.env](/Users/eliazbobadilla/Documents/internal-tools/services/n8n.env).
-5. Run `./scripts/generate-secrets.sh --apply` to generate the shared passwords
+5. Copy `services/infisical.env.example` to `services/infisical.env`.
+6. Run `./scripts/generate-secrets.sh --apply` to generate the shared passwords
    and synchronize service `.env` credentials.
-6. Review `.env` and confirm the DNS names and generated values are correct.
-7. Make sure the domain names in the service env files match the DNS records.
+7. Review `.env` and confirm the DNS names and generated values are correct.
+8. Make sure the domain names in the service env files match the DNS records.
 
 ## SMTP (Resend)
 

@@ -17,6 +17,7 @@
 
 - General setup: [docs/setup.md](docs/setup.md)
 - Hetzner-specific setup: [docs/hetzner.md](docs/hetzner.md)
+- Infisical setup and existing-server rollout: [docs/infisical.md](docs/infisical.md)
 - Operations runbook: [docs/runbook.md](docs/runbook.md)
 
 ## Quick Start
@@ -27,11 +28,12 @@
 2. Copy the service templates from
    [services/glitchtip.env.example](./services/glitchtip.env.example),
    [services/plane.env.example](./services/plane.env.example),
-   and
+   [services/infisical.env.example](./services/infisical.env.example), and
    [services/n8n.env.example](./services/n8n.env.example)
    to matching `.env` files.
-3. Point `issues.bobadilla.tech`, `tasks.bobadilla.tech`, and
-   `flows.bobadilla.tech` at the VPS.
+3. Point `issues.bobadilla.tech`, `tasks.bobadilla.tech`, `secrets.bobadilla.tech`
+   and `flows.bobadilla.tech` at the VPS.
+   access restriction in [docs/infisical.md](docs/infisical.md).
 4. Run `./scripts/generate-secrets.sh --apply` to populate the generated
    secrets.
 5. Run `docker compose up -d` from the repository root.
